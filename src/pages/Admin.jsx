@@ -9,6 +9,7 @@ function Admin() {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true); // ✅ NEW
   const API = import.meta.env.VITE_API_URL;
 
   const [form, setForm] = useState({
@@ -23,7 +24,6 @@ function Admin() {
     price: ""
   });
 
-  // 🔐 Protect route
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       toast.error("Please login first ❌");
@@ -35,10 +35,13 @@ function Admin() {
 
   // 📥 Fetch influencers
   const fetchData = () => {
+    setPageLoading(true); // ✅ START
+
     axios
       .get(`${API}/api/influencers`)
       .then((res) => setData(res.data))
-      .catch(() => toast.error("Failed to load data ❌"));
+      .catch(() => toast.error("Failed to load data ❌"))
+      .finally(() => setPageLoading(false)); // ✅ STOP
   };
 
   const handleChange = (e) => {
@@ -53,16 +56,10 @@ function Admin() {
       setLoading(true);
 
       if (editingId) {
-        await axios.put(
-          `${API}/api/influencers/${editingId}`,
-          form
-        );
+        await axios.put(`${API}/api/influencers/${editingId}`, form);
         toast.success("Influencer updated ✏️");
       } else {
-        await axios.post(
-          `${API}/api/influencers`,
-          form
-        );
+        await axios.post(`${API}/api/influencers`, form);
         toast.success("Influencer added 🚀");
       }
 
@@ -88,7 +85,6 @@ function Admin() {
     }
   };
 
-  // ✏️ Edit
   const handleEdit = (inf) => {
     setForm({
       name: inf.name || "",
@@ -106,18 +102,13 @@ function Admin() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ❌ Delete
   const deleteInfluencer = async (id) => {
     if (!window.confirm("Delete this influencer?")) return;
 
     try {
-      await axios.delete(
-        `${API}/api/influencers/${id}`
-      );
-
+      await axios.delete(`${API}/api/influencers/${id}`);
       toast.success("Influencer deleted 🗑️");
       fetchData();
-
     } catch {
       toast.error("Delete failed ❌");
     }
@@ -130,7 +121,6 @@ function Admin() {
 
         {/* 🔥 FORM */}
         <div className="bg-white p-8 rounded-2xl shadow mb-10">
-
           <h2 className="text-2xl font-bold text-center mb-6">
             {editingId ? "Update Influencer ✏️" : "Add Influencer 🚀"}
           </h2>
@@ -138,32 +128,21 @@ function Admin() {
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
 
             <input name="name" value={form.name} onChange={handleChange} placeholder="Name" className="border p-3 rounded-lg focus:ring-2 focus:ring-black" required />
-
             <input name="platform" value={form.platform} onChange={handleChange} placeholder="Platform" className="border p-3 rounded-lg" />
-
             <input name="followers" value={form.followers} onChange={handleChange} placeholder="Followers" className="border p-3 rounded-lg" />
-
             <input name="category" value={form.category} onChange={handleChange} placeholder="Category" className="border p-3 rounded-lg" />
-
             <input name="price" value={form.price} onChange={handleChange} placeholder="Price (₹)" className="border p-3 rounded-lg" />
-
             <input name="image" value={form.image} onChange={handleChange} placeholder="Image URL" className="border p-3 rounded-lg" />
-
             <input name="youtube" value={form.youtube} onChange={handleChange} placeholder="YouTube Link" className="border p-3 rounded-lg" />
-
             <input name="instagram" value={form.instagram} onChange={handleChange} placeholder="Instagram Link" className="border p-3 rounded-lg" />
 
             <textarea name="bio" value={form.bio} onChange={handleChange} placeholder="Bio" className="border p-3 rounded-lg md:col-span-2" />
 
             <button
               disabled={loading}
-              className="bg-black text-white py-3 rounded-xl col-span-2 hover:bg-gray-800 transition cursor-pointer"
+              className="bg-black text-white py-3 rounded-xl col-span-2 hover:bg-gray-800 transition"
             >
-              {loading
-                ? "Processing..."
-                : editingId
-                ? "Update Influencer"
-                : "Add Influencer 🚀"}
+              {loading ? "Processing..." : editingId ? "Update Influencer" : "Add Influencer 🚀"}
             </button>
 
           </form>
@@ -171,7 +150,24 @@ function Admin() {
 
         {/* 👥 LIST */}
         <div className="grid md:grid-cols-3 gap-6">
-          {data.map((inf) => (
+
+          {/* 🔥 SHIMMER */}
+          {pageLoading &&
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white p-4 rounded-2xl shadow animate-pulse">
+                <div className="w-full h-32 bg-gray-300 rounded mb-3"></div>
+                <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto mb-2"></div>
+                <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto mb-2"></div>
+                <div className="h-3 bg-gray-300 rounded w-1/3 mx-auto"></div>
+                <div className="flex justify-center gap-3 mt-4">
+                  <div className="h-8 w-16 bg-gray-300 rounded"></div>
+                  <div className="h-8 w-16 bg-gray-300 rounded"></div>
+                </div>
+              </div>
+            ))}
+
+          {/* ✅ REAL DATA */}
+          {!pageLoading && data.map((inf) => (
             <div
               key={inf._id}
               className="bg-white p-4 rounded-2xl shadow hover:shadow-xl transition text-center"
@@ -192,7 +188,6 @@ function Admin() {
               </p>
 
               <div className="flex justify-center gap-3 mt-4">
-
                 <button
                   onClick={() => handleEdit(inf)}
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 cursor-pointer"
@@ -206,10 +201,10 @@ function Admin() {
                 >
                   Delete
                 </button>
-
               </div>
             </div>
           ))}
+
         </div>
 
       </div>

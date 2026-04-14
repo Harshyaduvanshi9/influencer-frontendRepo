@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 
 function Enquiries() {
   const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true); // ✅ NEW
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL;
 
-  // 🔐 Protect route
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -18,7 +18,8 @@ function Enquiries() {
 
     axios.get(`${API}/api/leads`)
       .then(res => setLeads(res.data))
-      .catch(err => console.log(err));
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false)); // ✅ STOP LOADING
   }, []);
 
   return (
@@ -32,7 +33,24 @@ function Enquiries() {
       {/* 🎯 Grid */}
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
 
-        {leads.map((lead) => (
+        {/* 🔥 SHIMMER */}
+        {loading &&
+          Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white p-6 rounded-2xl shadow animate-pulse"
+            >
+              <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded w-1/3 mb-3"></div>
+
+              <div className="h-3 bg-gray-300 rounded w-2/3 mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded w-full mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded w-5/6"></div>
+            </div>
+          ))}
+
+        {/* ✅ REAL DATA */}
+        {!loading && leads.map((lead) => (
           <div
             key={lead._id}
             className="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition"
@@ -58,11 +76,12 @@ function Enquiries() {
       </div>
 
       {/* ❌ Empty */}
-      {leads.length === 0 && (
+      {!loading && leads.length === 0 && (
         <p className="text-center mt-10 text-gray-500">
           No enquiries yet 😔
         </p>
       )}
+
     </div>
   );
 }

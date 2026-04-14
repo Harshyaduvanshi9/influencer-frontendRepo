@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 function TeamAdmin() {
   const [team, setTeam] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true); // ✅ NEW
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL;
 
@@ -24,12 +25,17 @@ function TeamAdmin() {
     fetchTeam();
   }, []);
 
+  // 🔥 FETCH TEAM
   const fetchTeam = () => {
+    setLoading(true);
+
     axios.get(`${API}/api/team`)
       .then(res => setTeam(res.data))
-      .catch(() => toast.error("Failed to load team ❌"));
+      .catch(() => toast.error("Failed to load team ❌"))
+      .finally(() => setLoading(false));
   };
 
+  // 🔄 HANDLE INPUT
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -57,7 +63,7 @@ function TeamAdmin() {
     }
   };
 
-  // ✏️ Edit
+  // ✏️ EDIT
   const handleEdit = (member) => {
     setForm({
       name: member.name || "",
@@ -69,7 +75,7 @@ function TeamAdmin() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // ❌ Delete
+  // ❌ DELETE
   const deleteMember = async (id) => {
     if (!window.confirm("Delete this member?")) return;
 
@@ -144,7 +150,30 @@ function TeamAdmin() {
 
         {/* 👥 Team Cards */}
         <div className="grid md:grid-cols-3 gap-6">
-          {team.map((m) => (
+
+          {/* 🔥 SHIMMER */}
+          {loading &&
+            Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white p-5 rounded-2xl shadow animate-pulse text-center"
+              >
+                <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-3"></div>
+
+                <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto mb-2"></div>
+                <div className="h-3 bg-gray-300 rounded w-1/3 mx-auto mb-2"></div>
+
+                <div className="h-3 bg-gray-300 rounded w-2/3 mx-auto"></div>
+
+                <div className="flex justify-center gap-3 mt-4">
+                  <div className="h-8 w-16 bg-gray-300 rounded"></div>
+                  <div className="h-8 w-16 bg-gray-300 rounded"></div>
+                </div>
+              </div>
+            ))}
+
+          {/* ✅ REAL DATA */}
+          {!loading && team.map((m) => (
             <div
               key={m._id}
               className="bg-white p-5 rounded-2xl shadow hover:shadow-xl transition text-center"
@@ -161,9 +190,7 @@ function TeamAdmin() {
                 {m.bio}
               </p>
 
-              {/* 🔥 Actions */}
               <div className="flex justify-center gap-3 mt-4">
-
                 <button
                   onClick={() => handleEdit(m)}
                   className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
@@ -177,10 +204,10 @@ function TeamAdmin() {
                 >
                   Delete
                 </button>
-
               </div>
             </div>
           ))}
+
         </div>
 
       </div>
