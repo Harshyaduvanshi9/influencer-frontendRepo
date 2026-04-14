@@ -66,7 +66,7 @@ function Footer() {
 
       {/* 🔻 Bottom */}
       <div className="text-center text-gray-500 text-sm border-t border-gray-800 py-4">
-        © {new Date().getFullYear()} InfluencerHub. All rights reserved.
+        © {new Date().getFullYear()} UpsetMediaMarketing. All rights reserved.
       </div>
 
     </div>
