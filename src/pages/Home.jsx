@@ -10,9 +10,10 @@ function Home() {
   const [sort, setSort] = useState("");
   const [platform, setPlatform] = useState("");
   const [category, setCategory] = useState("");
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/influencers")
+    axios.get(`${API}/api/influencers`)
       .then(res => setData(res.data))
       .catch(err => console.log(err));
   }, []);

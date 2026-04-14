@@ -6,6 +6,7 @@ function Dashboard() {
   const [influencers, setInfluencers] = useState([]);
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = import.meta.env.VITE_API_URL;
 
   // 📤 Export Leads
   const exportLeads = () => {
@@ -39,8 +40,8 @@ function Dashboard() {
 
     // 🔥 Fetch data
     Promise.all([
-      axios.get("http://localhost:5000/api/influencers"),
-      axios.get("http://localhost:5000/api/leads")
+      axios.get(`${API}/api/influencers`),
+      axios.get(`${API}/api/leads`)
     ])
       .then(([infRes, leadRes]) => {
         setInfluencers(infRes.data);

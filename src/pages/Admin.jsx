@@ -9,6 +9,7 @@ function Admin() {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const API = import.meta.env.VITE_API_URL;
 
   const [form, setForm] = useState({
     name: "",
@@ -35,7 +36,7 @@ function Admin() {
   // 📥 Fetch influencers
   const fetchData = () => {
     axios
-      .get("http://localhost:5000/api/influencers")
+      .get(`${API}/api/influencers`)
       .then((res) => setData(res.data))
       .catch(() => toast.error("Failed to load data ❌"));
   };
@@ -53,13 +54,13 @@ function Admin() {
 
       if (editingId) {
         await axios.put(
-          `http://localhost:5000/api/influencers/${editingId}`,
+          `${API}/api/influencers/${editingId}`,
           form
         );
         toast.success("Influencer updated ✏️");
       } else {
         await axios.post(
-          "http://localhost:5000/api/influencers",
+          `${API}/api/influencers`,
           form
         );
         toast.success("Influencer added 🚀");
@@ -111,7 +112,7 @@ function Admin() {
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/influencers/${id}`
+        `${API}/api/influencers/${id}`
       );
 
       toast.success("Influencer deleted 🗑️");

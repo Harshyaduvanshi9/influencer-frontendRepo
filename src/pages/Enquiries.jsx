@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 function Enquiries() {
   const [leads, setLeads] = useState([]);
   const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_URL;
 
   // 🔐 Protect route
   useEffect(() => {
@@ -15,7 +16,7 @@ function Enquiries() {
       return;
     }
 
-    axios.get("http://localhost:5000/api/leads")
+    axios.get(`${API}/api/leads`)
       .then(res => setLeads(res.data))
       .catch(err => console.log(err));
   }, []);

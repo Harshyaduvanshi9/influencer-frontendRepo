@@ -7,6 +7,7 @@ function TeamAdmin() {
   const [team, setTeam] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_URL;
 
   const [form, setForm] = useState({
     name: "",
@@ -24,7 +25,7 @@ function TeamAdmin() {
   }, []);
 
   const fetchTeam = () => {
-    axios.get("http://localhost:5000/api/team")
+    axios.get(`${API}/api/team`)
       .then(res => setTeam(res.data))
       .catch(() => toast.error("Failed to load team ❌"));
   };
@@ -39,10 +40,10 @@ function TeamAdmin() {
 
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/team/${editingId}`, form);
+        await axios.put(`${API}/api/team/${editingId}`, form);
         toast.success("Member updated successfully ✏️");
       } else {
-        await axios.post("http://localhost:5000/api/team", form);
+        await axios.post(`${API}/api/team`, form);
         toast.success("Member added successfully 🚀");
       }
 
@@ -73,7 +74,7 @@ function TeamAdmin() {
     if (!window.confirm("Delete this member?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/team/${id}`);
+      await axios.delete(`${API}/api/team/${id}`);
       toast.success("Member deleted 🗑️");
       fetchTeam();
     } catch {

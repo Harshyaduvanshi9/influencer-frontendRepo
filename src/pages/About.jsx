@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 
 function About() {
   const [team, setTeam] = useState([]);
+  const API = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/team")
+    axios.get(`${API}/api/team`)
       .then(res => setTeam(res.data))
       .catch(err => console.log(err));
   }, []);
@@ -19,7 +21,7 @@ function About() {
     <div className="min-h-screen bg-gray-100 px-4 pt-28 pb-12">
 
       {/* Header */}
-      <motion.div
+      <motion.div 
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-5xl mx-auto text-center mb-12"
