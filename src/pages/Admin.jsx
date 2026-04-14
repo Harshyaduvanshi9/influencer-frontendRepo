@@ -1,0 +1,219 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
+function Admin() {
+  const navigate = useNavigate();
+
+  const [data, setData] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    name: "",
+    platform: "",
+    followers: "",
+    category: "",
+    bio: "",
+    image: "",
+    youtube: "",
+    instagram: "",
+    price: ""
+  });
+
+  // 🔐 Protect route
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      toast.error("Please login first ❌");
+      navigate("/login");
+      return;
+    }
+    fetchData();
+  }, []);
+
+  // 📥 Fetch influencers
+  const fetchData = () => {
+    axios
+      .get("http://localhost:5000/api/influencers")
+      .then((res) => setData(res.data))
+      .catch(() => toast.error("Failed to load data ❌"));
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // 🚀 ADD / UPDATE
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      if (editingId) {
+        await axios.put(
+          `http://localhost:5000/api/influencers/${editingId}`,
+          form
+        );
+        toast.success("Influencer updated ✏️");
+      } else {
+        await axios.post(
+          "http://localhost:5000/api/influencers",
+          form
+        );
+        toast.success("Influencer added 🚀");
+      }
+
+      setForm({
+        name: "",
+        platform: "",
+        followers: "",
+        category: "",
+        bio: "",
+        image: "",
+        youtube: "",
+        instagram: "",
+        price: ""
+      });
+
+      setEditingId(null);
+      fetchData();
+
+    } catch {
+      toast.error("Something went wrong ❌");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✏️ Edit
+  const handleEdit = (inf) => {
+    setForm({
+      name: inf.name || "",
+      platform: inf.platform || "",
+      followers: inf.followers || "",
+      category: inf.category || "",
+      bio: inf.bio || "",
+      image: inf.image || "",
+      youtube: inf.youtube || "",
+      instagram: inf.instagram || "",
+      price: inf.price || ""
+    });
+
+    setEditingId(inf._id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ❌ Delete
+  const deleteInfluencer = async (id) => {
+    if (!window.confirm("Delete this influencer?")) return;
+
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/influencers/${id}`
+      );
+
+      toast.success("Influencer deleted 🗑️");
+      fetchData();
+
+    } catch {
+      toast.error("Delete failed ❌");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 px-4 pt-28 pb-10">
+
+      <div className="max-w-6xl mx-auto">
+
+        {/* 🔥 FORM */}
+        <div className="bg-white p-8 rounded-2xl shadow mb-10">
+
+          <h2 className="text-2xl font-bold text-center mb-6">
+            {editingId ? "Update Influencer ✏️" : "Add Influencer 🚀"}
+          </h2>
+
+          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
+
+            <input name="name" value={form.name} onChange={handleChange} placeholder="Name" className="border p-3 rounded-lg focus:ring-2 focus:ring-black" required />
+
+            <input name="platform" value={form.platform} onChange={handleChange} placeholder="Platform" className="border p-3 rounded-lg" />
+
+            <input name="followers" value={form.followers} onChange={handleChange} placeholder="Followers" className="border p-3 rounded-lg" />
+
+            <input name="category" value={form.category} onChange={handleChange} placeholder="Category" className="border p-3 rounded-lg" />
+
+            <input name="price" value={form.price} onChange={handleChange} placeholder="Price (₹)" className="border p-3 rounded-lg" />
+
+            <input name="image" value={form.image} onChange={handleChange} placeholder="Image URL" className="border p-3 rounded-lg" />
+
+            <input name="youtube" value={form.youtube} onChange={handleChange} placeholder="YouTube Link" className="border p-3 rounded-lg" />
+
+            <input name="instagram" value={form.instagram} onChange={handleChange} placeholder="Instagram Link" className="border p-3 rounded-lg" />
+
+            <textarea name="bio" value={form.bio} onChange={handleChange} placeholder="Bio" className="border p-3 rounded-lg md:col-span-2" />
+
+            <button
+              disabled={loading}
+              className="bg-black text-white py-3 rounded-xl col-span-2 hover:bg-gray-800 transition cursor-pointer"
+            >
+              {loading
+                ? "Processing..."
+                : editingId
+                ? "Update Influencer"
+                : "Add Influencer 🚀"}
+            </button>
+
+          </form>
+        </div>
+
+        {/* 👥 LIST */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {data.map((inf) => (
+            <div
+              key={inf._id}
+              className="bg-white p-4 rounded-2xl shadow hover:shadow-xl transition text-center"
+            >
+              <img
+                src={inf.image || "https://via.placeholder.com/150"}
+                className="w-full h-32 object-cover rounded mb-3"
+              />
+
+              <h3 className="font-semibold text-lg">{inf.name}</h3>
+
+              <p className="text-sm text-gray-500">
+                👥 {inf.followers}
+              </p>
+
+              <p className="text-sm font-semibold text-green-600">
+                ₹{inf.price}
+              </p>
+
+              <div className="flex justify-center gap-3 mt-4">
+
+                <button
+                  onClick={() => handleEdit(inf)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 cursor-pointer"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => deleteInfluencer(inf._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 cursor-pointer"
+                >
+                  Delete
+                </button>
+
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+export default Admin;
