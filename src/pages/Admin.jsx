@@ -9,7 +9,7 @@ function Admin() {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true); // ✅ NEW
+  const [pageLoading, setPageLoading] = useState(true);
   const API = import.meta.env.VITE_API_URL;
 
   const [form, setForm] = useState({
@@ -33,22 +33,19 @@ function Admin() {
     fetchData();
   }, []);
 
-  // 📥 Fetch influencers
   const fetchData = () => {
-    setPageLoading(true); // ✅ START
+    setPageLoading(true);
 
-    axios
-      .get(`${API}/api/influencers`)
+    axios.get(`${API}/api/influencers`)
       .then((res) => setData(res.data))
       .catch(() => toast.error("Failed to load data ❌"))
-      .finally(() => setPageLoading(false)); // ✅ STOP
+      .finally(() => setPageLoading(false));
   };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // 🚀 ADD / UPDATE
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -86,18 +83,7 @@ function Admin() {
   };
 
   const handleEdit = (inf) => {
-    setForm({
-      name: inf.name || "",
-      platform: inf.platform || "",
-      followers: inf.followers || "",
-      category: inf.category || "",
-      bio: inf.bio || "",
-      image: inf.image || "",
-      youtube: inf.youtube || "",
-      instagram: inf.instagram || "",
-      price: inf.price || ""
-    });
-
+    setForm({ ...inf });
     setEditingId(inf._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -115,32 +101,32 @@ function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 pt-28 pb-10">
+    <div className="min-h-screen bg-gray-100 px-3 sm:px-4 pt-24 sm:pt-28 pb-10">
 
       <div className="max-w-6xl mx-auto">
 
         {/* 🔥 FORM */}
-        <div className="bg-white p-8 rounded-2xl shadow mb-10">
-          <h2 className="text-2xl font-bold text-center mb-6">
+        <div className="bg-white p-4 sm:p-8 rounded-2xl shadow mb-10">
+          <h2 className="text-xl sm:text-2xl font-bold text-center mb-6">
             {editingId ? "Update Influencer ✏️" : "Add Influencer 🚀"}
           </h2>
 
-          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
+          <form className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6" onSubmit={handleSubmit}>
 
-            <input name="name" value={form.name} onChange={handleChange} placeholder="Name" className="border p-3 rounded-lg focus:ring-2 focus:ring-black" required />
-            <input name="platform" value={form.platform} onChange={handleChange} placeholder="Platform" className="border p-3 rounded-lg" />
-            <input name="followers" value={form.followers} onChange={handleChange} placeholder="Followers" className="border p-3 rounded-lg" />
-            <input name="category" value={form.category} onChange={handleChange} placeholder="Category" className="border p-3 rounded-lg" />
-            <input name="price" value={form.price} onChange={handleChange} placeholder="Price (₹)" className="border p-3 rounded-lg" />
-            <input name="image" value={form.image} onChange={handleChange} placeholder="Image URL" className="border p-3 rounded-lg" />
-            <input name="youtube" value={form.youtube} onChange={handleChange} placeholder="YouTube Link" className="border p-3 rounded-lg" />
-            <input name="instagram" value={form.instagram} onChange={handleChange} placeholder="Instagram Link" className="border p-3 rounded-lg" />
+            <input name="name" value={form.name} onChange={handleChange} placeholder="Name" className="border p-3 rounded-lg w-full" required />
+            <input name="platform" value={form.platform} onChange={handleChange} placeholder="Platform" className="border p-3 rounded-lg w-full" />
+            <input name="followers" value={form.followers} onChange={handleChange} placeholder="Followers" className="border p-3 rounded-lg w-full" />
+            <input name="category" value={form.category} onChange={handleChange} placeholder="Category" className="border p-3 rounded-lg w-full" />
+            <input name="price" value={form.price} onChange={handleChange} placeholder="Price (₹)" className="border p-3 rounded-lg w-full" />
+            <input name="image" value={form.image} onChange={handleChange} placeholder="Image URL" className="border p-3 rounded-lg w-full" />
+            <input name="youtube" value={form.youtube} onChange={handleChange} placeholder="YouTube Link" className="border p-3 rounded-lg w-full" />
+            <input name="instagram" value={form.instagram} onChange={handleChange} placeholder="Instagram Link" className="border p-3 rounded-lg w-full" />
 
-            <textarea name="bio" value={form.bio} onChange={handleChange} placeholder="Bio" className="border p-3 rounded-lg md:col-span-2" />
+            <textarea name="bio" value={form.bio} onChange={handleChange} placeholder="Bio" className="border p-3 rounded-lg w-full sm:col-span-2" />
 
             <button
               disabled={loading}
-              className="bg-black text-white py-3 rounded-xl col-span-2 hover:bg-gray-800 transition"
+              className="bg-black text-white py-3 rounded-xl w-full sm:col-span-2 hover:bg-gray-800 transition"
             >
               {loading ? "Processing..." : editingId ? "Update Influencer" : "Add Influencer 🚀"}
             </button>
@@ -148,8 +134,8 @@ function Admin() {
           </form>
         </div>
 
-        {/* 👥 LIST */}
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* 👥 CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
 
           {/* 🔥 SHIMMER */}
           {pageLoading &&
@@ -157,16 +143,11 @@ function Admin() {
               <div key={i} className="bg-white p-4 rounded-2xl shadow animate-pulse">
                 <div className="w-full h-32 bg-gray-300 rounded mb-3"></div>
                 <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto mb-2"></div>
-                <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto mb-2"></div>
-                <div className="h-3 bg-gray-300 rounded w-1/3 mx-auto"></div>
-                <div className="flex justify-center gap-3 mt-4">
-                  <div className="h-8 w-16 bg-gray-300 rounded"></div>
-                  <div className="h-8 w-16 bg-gray-300 rounded"></div>
-                </div>
+                <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto"></div>
               </div>
             ))}
 
-          {/* ✅ REAL DATA */}
+          {/* ✅ DATA */}
           {!pageLoading && data.map((inf) => (
             <div
               key={inf._id}
@@ -177,7 +158,7 @@ function Admin() {
                 className="w-full h-32 object-cover rounded mb-3"
               />
 
-              <h3 className="font-semibold text-lg">{inf.name}</h3>
+              <h3 className="font-semibold text-base sm:text-lg">{inf.name}</h3>
 
               <p className="text-sm text-gray-500">
                 👥 {inf.followers}
@@ -187,20 +168,23 @@ function Admin() {
                 ₹{inf.price}
               </p>
 
-              <div className="flex justify-center gap-3 mt-4">
+              {/* 🔥 BUTTONS FIX */}
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
+
                 <button
                   onClick={() => handleEdit(inf)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 cursor-pointer"
+                  className="w-full sm:w-auto bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => deleteInfluencer(inf._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 cursor-pointer"
+                  className="w-full sm:w-auto bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
                 >
                   Delete
                 </button>
+
               </div>
             </div>
           ))}
